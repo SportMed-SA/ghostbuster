@@ -1,6 +1,7 @@
 project_name: ghostbuster
 
 builds:
+  - main: ./cmd/ghostbuster
   - env:
       - CGO_ENABLED=0
     goos:
