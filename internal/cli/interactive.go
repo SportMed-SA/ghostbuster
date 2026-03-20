@@ -3,12 +3,15 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"ghostbuster/internal/scanner"
 
 	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 const (
@@ -25,7 +28,7 @@ var (
 )
 
 func runInteractiveRoot(cmd *cobra.Command) error {
-	var action string
+	action := actionDetect
 
 	if err := askAction(&action); err != nil {
 		return err
@@ -243,7 +246,9 @@ func askAction(value *string) error {
 	return runSingleFieldForm(
 		huh.NewSelect[string]().
 			Title("Welcome to Ghostbuster").
-			Description("Choose what you want to run").
+			DescriptionFunc(func() string {
+				return actionHint(*value)
+			}, value).
 			Options(
 				huh.NewOption("Detect unused keys", actionDetect),
 				huh.NewOption("Hunt and remove unused keys", actionHunt),
@@ -252,6 +257,21 @@ func askAction(value *string) error {
 			).
 			Value(value),
 	)
+}
+
+func actionHint(action string) string {
+	switch action {
+	case actionDetect:
+		return "Detect: analyze translations vs source usage and report unused keys without changing files."
+	case actionHunt:
+		return "Hunt: remove currently unused keys and create timestamped backups by default."
+	case actionRestore:
+		return "Restore: recover translation files from the best available backup created by hunt."
+	case actionHelp:
+		return "Help: show command-specific help for root, detect, hunt, or restore."
+	default:
+		return "Choose what you want to run."
+	}
 }
 
 func askHelpTopic(value *string) error {
@@ -312,14 +332,61 @@ func askConfirm(title string, value *bool) error {
 }
 
 func runSingleFieldForm(field huh.Field) error {
-	form := huh.NewForm(huh.NewGroup(field))
+	form := newInteractiveForm(huh.NewGroup(field))
 	return form.Run()
+}
+
+func newInteractiveForm(groups ...*huh.Group) *huh.Form {
+	return huh.NewForm(groups...).WithLayout(newCenteredBoxLayout())
+}
+
+type centeredBoxLayout struct {
+	contentWidth int
+}
+
+func newCenteredBoxLayout() huh.Layout {
+	return &centeredBoxLayout{}
+}
+
+func (l *centeredBoxLayout) GroupWidth(_ *huh.Form, _ *huh.Group, w int) int {
+	available := w - 8
+	if available < 32 {
+		available = w - 2
+	}
+	if available < 24 {
+		available = 24
+	}
+	if available > 96 {
+		available = 96
+	}
+
+	l.contentWidth = available
+	return available
+}
+
+func (l *centeredBoxLayout) View(f *huh.Form) string {
+	content := huh.LayoutDefault.View(f)
+
+	boxed := lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("240")).
+		Padding(1, 2).
+		Width(max(24, l.contentWidth)).
+		Render(content)
+
+	fd := int(os.Stderr.Fd())
+	termWidth, termHeight, err := term.GetSize(fd)
+	if err != nil || termWidth <= 0 || termHeight <= 0 {
+		return boxed
+	}
+
+	return lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, boxed)
 }
 
 func confirmExecution(preview string) (bool, error) {
 	confirmed := false
 
-	form := huh.NewForm(huh.NewGroup(huh.NewNote().Title("Command preview").Description(preview)))
+	form := newInteractiveForm(huh.NewGroup(huh.NewNote().Title("Command preview").Description(preview)))
 	if err := form.Run(); err != nil {
 		return false, err
 	}
