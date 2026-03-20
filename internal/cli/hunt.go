@@ -1,0 +1,117 @@
+package cli
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"sort"
+	"strings"
+
+	"ghostbuster/internal/scanner"
+
+	"github.com/spf13/cobra"
+)
+
+var (
+	huntTranslationsPath string
+	huntSourcePath       string
+	huntFormat           string
+	huntPrefix           string
+	huntExtensions       []string
+	huntExcludeDirs      []string
+	huntNoBackup         bool
+)
+
+var huntCmd = &cobra.Command{
+	Use:          "hunt",
+	Short:        "Find and remove unused translation keys",
+	SilenceUsage: true,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		opts := scanner.HuntOptions{
+			Options: scanner.Options{
+				TranslationsPath: huntTranslationsPath,
+				SourcePath:       huntSourcePath,
+				Prefix:           huntPrefix,
+				Extensions:       huntExtensions,
+				ExcludeDirs:      huntExcludeDirs,
+			},
+			CreateBackup: !huntNoBackup,
+		}
+
+		result, err := scanner.HuntUnusedKeys(opts)
+		if err != nil {
+			return err
+		}
+
+		switch strings.ToLower(huntFormat) {
+		case "text":
+			printHuntTextResult(result, opts.CreateBackup)
+		case "json":
+			payload, err := json.MarshalIndent(result, "", "  ")
+			if err != nil {
+				return fmt.Errorf("marshal JSON output: %w", err)
+			}
+			fmt.Println(string(payload))
+		default:
+			return errors.New("unsupported format: use text or json")
+		}
+
+		if result.RemovedCount > 0 {
+			return cliExitError{msg: "unused translation keys removed", code: unusedFoundExitCode}
+		}
+
+		return nil
+	},
+}
+
+func printHuntTextResult(result scanner.HuntResult, createBackup bool) {
+	sort.Strings(result.RemovedKeys)
+	sort.Strings(result.FilesModified)
+	sort.Strings(result.BackupsCreated)
+
+	fmt.Printf("Detected unused keys: %d\n", result.DetectedUnusedCount)
+	fmt.Printf("Removed keys: %d\n", result.RemovedCount)
+	fmt.Printf("Files modified: %d\n", len(result.FilesModified))
+	if createBackup {
+		fmt.Printf("Backups created: %d\n", len(result.BackupsCreated))
+	}
+
+	if len(result.FilesModified) > 0 {
+		fmt.Println()
+		fmt.Println("Updated translation files:")
+		for _, file := range result.FilesModified {
+			fmt.Printf("- %s\n", file)
+		}
+	}
+
+	if len(result.BackupsCreated) > 0 {
+		fmt.Println()
+		fmt.Println("Backup files:")
+		for _, file := range result.BackupsCreated {
+			fmt.Printf("- %s\n", file)
+		}
+	}
+
+	if len(result.RemovedKeys) > 0 {
+		fmt.Println()
+		fmt.Println("Removed translation keys:")
+		for _, key := range result.RemovedKeys {
+			fmt.Printf("- %s\n", key)
+		}
+	}
+}
+
+func init() {
+	rootCmd.AddCommand(huntCmd)
+
+	huntCmd.Flags().StringVarP(&huntTranslationsPath, "translations", "t", "", "Path to translation JSON file or directory")
+	huntCmd.Flags().StringVarP(&huntSourcePath, "source", "s", "", "Path to frontend source directory")
+	huntCmd.Flags().StringVar(&huntFormat, "format", "text", "Output format: text or json")
+	huntCmd.Flags().StringVar(&huntPrefix, "prefix", "_globalTranslations.", "Translation key prefix to analyze")
+	huntCmd.Flags().StringSliceVar(&huntExtensions, "ext", []string{".js", ".jsx", ".ts", ".tsx", ".vue", ".svelte", ".html"}, "Source file extensions to scan")
+	huntCmd.Flags().StringSliceVar(&huntExcludeDirs, "exclude-dir", []string{"node_modules", "dist", "build", "coverage", ".next"}, "Directory names to skip while scanning source files")
+	huntCmd.Flags().BoolVar(&huntNoBackup, "no-backup", false, "Do not create .bak backup copies before deleting keys")
+
+	_ = huntCmd.MarkFlagRequired("translations")
+	_ = huntCmd.MarkFlagRequired("source")
+}
