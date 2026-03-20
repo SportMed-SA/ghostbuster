@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 import (
 	"encoding/json"
@@ -72,6 +72,7 @@ var unusedKeysCmd = &cobra.Command{
 		if len(result.UnusedKeys) > 0 {
 			return cliExitError{msg: "unused translation keys found", code: unusedFoundExitCode}
 		}
+
 		return nil
 	},
 }
@@ -100,16 +101,18 @@ func printTextResult(result scanner.Result) {
 	}
 }
 
+// Sets up the command flags and add the command to the root command.
 func init() {
 	rootCmd.AddCommand(unusedKeysCmd)
 
-	unusedKeysCmd.Flags().StringVarP(&unusedTranslationsPath, "translations", "t", ".", "Path to translation JSON file or directory")
-	unusedKeysCmd.Flags().StringVarP(&unusedSourcePath, "source", "s", ".", "Path to frontend source directory")
+	unusedKeysCmd.Flags().StringVarP(&unusedTranslationsPath, "translations", "t", "", "Path to translation JSON file or directory")
+	unusedKeysCmd.Flags().StringVarP(&unusedSourcePath, "source", "s", "", "Path to frontend source directory")
 	unusedKeysCmd.Flags().StringVar(&unusedFormat, "format", "text", "Output format: text or json")
 	unusedKeysCmd.Flags().StringVar(&unusedPrefix, "prefix", "_globalTranslations.", "Translation key prefix to analyze")
 	unusedKeysCmd.Flags().StringSliceVar(&unusedExts, "ext", []string{".js", ".jsx", ".ts", ".tsx", ".vue", ".svelte", ".html"}, "Source file extensions to scan")
 	unusedKeysCmd.Flags().StringSliceVar(&unusedExcludeDirs, "exclude-dir", []string{"node_modules", "dist", "build", "coverage", ".next"}, "Directory names to skip while scanning source files")
 
+	// Those functions return an error if the flag doesn't exist, but we just defined them, so we can ignore the error.
 	_ = unusedKeysCmd.MarkFlagRequired("translations")
 	_ = unusedKeysCmd.MarkFlagRequired("source")
 }

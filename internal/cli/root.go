@@ -1,7 +1,4 @@
-/*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
-*/
-package cmd
+package cli
 
 import (
 	"os"
@@ -17,7 +14,7 @@ type exitCoder interface {
 var rootCmd = &cobra.Command{
 	Use:   "ghostbuster",
 	Short: "A simple and straightforward tool to find unused translation keys in your project.",
-	Long: `ghostbuster is a simple command-line tool designed to help developers finding unused translation keys in their projects. It scans nested JSON translation files and frontend source code to identify translation keys that are defined but not used anywhere in the codebase. This helps to keep your translation files clean and maintainable by removing obsolete keys.`,
+	Long:  `ghostbuster is a simple command-line tool designed to help developers finding unused translation keys in their projects. It scans nested JSON translation files and frontend source code to identify translation keys that are defined but not used anywhere in the codebase. This helps to keep your translation files clean and maintainable by removing obsolete keys.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -36,6 +33,8 @@ func Execute() {
 }
 
 func init() {
+	configureHelpOutput(rootCmd)
+
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
