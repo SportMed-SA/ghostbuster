@@ -27,41 +27,51 @@ var huntCmd = &cobra.Command{
 	Short:        "Find and remove unused translation keys",
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		opts := scanner.HuntOptions{
-			Options: scanner.Options{
-				TranslationsPath: huntTranslationsPath,
-				SourcePath:       huntSourcePath,
-				Prefix:           huntPrefix,
-				Extensions:       huntExtensions,
-				ExcludeDirs:      huntExcludeDirs,
+		return runHunt(huntRunConfig{
+			HuntOptions: scanner.HuntOptions{
+				Options: scanner.Options{
+					TranslationsPath: huntTranslationsPath,
+					SourcePath:       huntSourcePath,
+					Prefix:           huntPrefix,
+					Extensions:       huntExtensions,
+					ExcludeDirs:      huntExcludeDirs,
+				},
+				CreateBackup: !huntNoBackup,
 			},
-			CreateBackup: !huntNoBackup,
-		}
-
-		result, err := scanner.HuntUnusedKeys(opts)
-		if err != nil {
-			return err
-		}
-
-		switch strings.ToLower(huntFormat) {
-		case "text":
-			printHuntTextResult(result, opts.CreateBackup)
-		case "json":
-			payload, err := json.MarshalIndent(result, "", "  ")
-			if err != nil {
-				return fmt.Errorf("marshal JSON output: %w", err)
-			}
-			fmt.Println(string(payload))
-		default:
-			return errors.New("unsupported format: use text or json")
-		}
-
-		if result.RemovedCount > 0 {
-			return cliExitError{msg: "unused translation keys removed", code: unusedFoundExitCode}
-		}
-
-		return nil
+			Format: huntFormat,
+		})
 	},
+}
+
+type huntRunConfig struct {
+	HuntOptions scanner.HuntOptions
+	Format      string
+}
+
+func runHunt(cfg huntRunConfig) error {
+	result, err := scanner.HuntUnusedKeys(cfg.HuntOptions)
+	if err != nil {
+		return err
+	}
+
+	switch strings.ToLower(cfg.Format) {
+	case "text":
+		printHuntTextResult(result, cfg.HuntOptions.CreateBackup)
+	case "json":
+		payload, err := json.MarshalIndent(result, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal JSON output: %w", err)
+		}
+		fmt.Println(string(payload))
+	default:
+		return errors.New("unsupported format: use text or json")
+	}
+
+	if result.RemovedCount > 0 {
+		return cliExitError{msg: "unused translation keys removed", code: unusedFoundExitCode}
+	}
+
+	return nil
 }
 
 func printHuntTextResult(result scanner.HuntResult, createBackup bool) {

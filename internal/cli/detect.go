@@ -43,38 +43,48 @@ var detectCmd = &cobra.Command{
 	Short:        "Find translation key ghosts in your codebase and translation files",
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		opts := scanner.Options{
-			TranslationsPath: translationsPath,
-			SourcePath:       sourcePath,
-			Prefix:           prefix,
-			Extensions:       extensions,
-			ExcludeDirs:      excludeDirs,
-		}
-
-		result, err := scanner.FindUnusedKeys(opts)
-		if err != nil {
-			return err
-		}
-
-		switch strings.ToLower(format) {
-		case "text":
-			printTextResult(result)
-		case "json":
-			payload, err := json.MarshalIndent(result, "", "  ")
-			if err != nil {
-				return fmt.Errorf("marshal JSON output: %w", err)
-			}
-			fmt.Println(string(payload))
-		default:
-			return errors.New("unsupported format: use text or json")
-		}
-
-		if len(result.UnusedKeys) > 0 {
-			return cliExitError{msg: "unused translation keys found", code: unusedFoundExitCode}
-		}
-
-		return nil
+		return runDetect(detectRunConfig{
+			Options: scanner.Options{
+				TranslationsPath: translationsPath,
+				SourcePath:       sourcePath,
+				Prefix:           prefix,
+				Extensions:       extensions,
+				ExcludeDirs:      excludeDirs,
+			},
+			Format: format,
+		})
 	},
+}
+
+type detectRunConfig struct {
+	Options scanner.Options
+	Format  string
+}
+
+func runDetect(cfg detectRunConfig) error {
+	result, err := scanner.FindUnusedKeys(cfg.Options)
+	if err != nil {
+		return err
+	}
+
+	switch strings.ToLower(cfg.Format) {
+	case "text":
+		printTextResult(result)
+	case "json":
+		payload, err := json.MarshalIndent(result, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal JSON output: %w", err)
+		}
+		fmt.Println(string(payload))
+	default:
+		return errors.New("unsupported format: use text or json")
+	}
+
+	if len(result.UnusedKeys) > 0 {
+		return cliExitError{msg: "unused translation keys found", code: unusedFoundExitCode}
+	}
+
+	return nil
 }
 
 func printTextResult(result scanner.Result) {

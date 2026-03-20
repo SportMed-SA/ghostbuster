@@ -22,26 +22,38 @@ var restoreCmd = &cobra.Command{
 	Short:        "Restore translation files from backup files created by hunt",
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		result, err := scanner.RestoreFromBackup(scanner.RestoreOptions{TranslationsPath: restoreTranslationsPath})
-		if err != nil {
-			return err
-		}
-
-		switch strings.ToLower(restoreFormat) {
-		case "text":
-			printRestoreTextResult(result)
-		case "json":
-			payload, err := json.MarshalIndent(result, "", "  ")
-			if err != nil {
-				return fmt.Errorf("marshal JSON output: %w", err)
-			}
-			fmt.Println(string(payload))
-		default:
-			return errors.New("unsupported format: use text or json")
-		}
-
-		return nil
+		return runRestore(restoreRunConfig{
+			RestoreOptions: scanner.RestoreOptions{TranslationsPath: restoreTranslationsPath},
+			Format:         restoreFormat,
+		})
 	},
+}
+
+type restoreRunConfig struct {
+	RestoreOptions scanner.RestoreOptions
+	Format         string
+}
+
+func runRestore(cfg restoreRunConfig) error {
+	result, err := scanner.RestoreFromBackup(cfg.RestoreOptions)
+	if err != nil {
+		return err
+	}
+
+	switch strings.ToLower(cfg.Format) {
+	case "text":
+		printRestoreTextResult(result)
+	case "json":
+		payload, err := json.MarshalIndent(result, "", "  ")
+		if err != nil {
+			return fmt.Errorf("marshal JSON output: %w", err)
+		}
+		fmt.Println(string(payload))
+	default:
+		return errors.New("unsupported format: use text or json")
+	}
+
+	return nil
 }
 
 func printRestoreTextResult(result scanner.RestoreResult) {

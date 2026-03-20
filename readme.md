@@ -2,6 +2,13 @@
 
 Ghostbuster is a simple command-line tool to find unused translation keys in your project.
 
+## Interactive mode
+
+Run `ghostbuster` without arguments to open the interactive TUI (powered by go-huh).
+The interactive flow supports `detect`, `hunt`, `restore`, and `help`, shows a command preview, and asks for confirmation before execution.
+
+In non-interactive contexts, bare `ghostbuster` exits with an explicit error. Use subcommands directly for automation/CI.
+
 ## Commands
 
 ### Detect unused keys
