@@ -15,21 +15,24 @@ var (
 	templateQuotedRE = regexp.MustCompile("`([^`\\\\]*(?:\\\\.[^`\\\\]*)*)`")
 )
 
+// Scans the source directory for used translation keys based on the provided prefix and file extensions.
 func scanUsedKeys(sourcePath, prefix string, exts, excludedDirs []string) (map[string]struct{}, error) {
 	if sourcePath == "" {
 		return nil, fmt.Errorf("source path must not be empty")
 	}
 
-	extSet := make(map[string]struct{}, len(exts))
+	extensionsSet := make(map[string]struct{}, len(exts))
 	for _, ext := range exts {
 		normalized := strings.ToLower(strings.TrimSpace(ext))
 		if normalized == "" {
 			continue
 		}
+
 		if !strings.HasPrefix(normalized, ".") {
 			normalized = "." + normalized
 		}
-		extSet[normalized] = struct{}{}
+
+		extensionsSet[normalized] = struct{}{}
 	}
 
 	excludeSet := make(map[string]struct{}, len(excludedDirs))
@@ -38,6 +41,7 @@ func scanUsedKeys(sourcePath, prefix string, exts, excludedDirs []string) (map[s
 		if normalized == "" {
 			continue
 		}
+
 		excludeSet[normalized] = struct{}{}
 	}
 
@@ -46,15 +50,17 @@ func scanUsedKeys(sourcePath, prefix string, exts, excludedDirs []string) (map[s
 		if walkErr != nil {
 			return walkErr
 		}
+
 		if d.IsDir() {
 			if _, excluded := excludeSet[d.Name()]; excluded {
 				return fs.SkipDir
 			}
+
 			return nil
 		}
 
-		if len(extSet) > 0 {
-			if _, ok := extSet[strings.ToLower(filepath.Ext(path))]; !ok {
+		if len(extensionsSet) > 0 {
+			if _, ok := extensionsSet[strings.ToLower(filepath.Ext(path))]; !ok {
 				return nil
 			}
 		}
@@ -63,11 +69,14 @@ func scanUsedKeys(sourcePath, prefix string, exts, excludedDirs []string) (map[s
 		if err != nil {
 			return err
 		}
+
 		for key := range fileKeys {
 			used[key] = struct{}{}
 		}
+
 		return nil
 	})
+
 	if err != nil {
 		return nil, fmt.Errorf("scan source path %q: %w", sourcePath, err)
 	}
@@ -75,6 +84,7 @@ func scanUsedKeys(sourcePath, prefix string, exts, excludedDirs []string) (map[s
 	return used, nil
 }
 
+// Compares the collected translation keys with the used keys to determine which keys are unused and which used keys are unknown (not defined in translations).
 func extractUsedKeysFromFile(path, prefix string) (map[string]struct{}, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {

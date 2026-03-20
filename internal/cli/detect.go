@@ -30,25 +30,25 @@ func (e cliExitError) ExitCode() int {
 }
 
 var (
-	unusedTranslationsPath string
-	unusedSourcePath       string
-	unusedFormat           string
-	unusedPrefix           string
-	unusedExts             []string
-	unusedExcludeDirs      []string
+	translationsPath string
+	sourcePath       string
+	format           string
+	prefix           string
+	extensions       []string
+	excludeDirs      []string
 )
 
-var unusedKeysCmd = &cobra.Command{
-	Use:   "unused-keys",
-	Short: "Find unused translation keys",
-	Long:  "Scan nested JSON translations and frontend files to report unused translation keys.",
+var detectCmd = &cobra.Command{
+	Use:          "detect",
+	Short:        "Find translation key ghosts in your codebase and translation files",
+	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		opts := scanner.Options{
-			TranslationsPath: unusedTranslationsPath,
-			SourcePath:       unusedSourcePath,
-			Prefix:           unusedPrefix,
-			Extensions:       unusedExts,
-			ExcludeDirs:      unusedExcludeDirs,
+			TranslationsPath: translationsPath,
+			SourcePath:       sourcePath,
+			Prefix:           prefix,
+			Extensions:       extensions,
+			ExcludeDirs:      excludeDirs,
 		}
 
 		result, err := scanner.FindUnusedKeys(opts)
@@ -56,7 +56,7 @@ var unusedKeysCmd = &cobra.Command{
 			return err
 		}
 
-		switch strings.ToLower(unusedFormat) {
+		switch strings.ToLower(format) {
 		case "text":
 			printTextResult(result)
 		case "json":
@@ -103,16 +103,16 @@ func printTextResult(result scanner.Result) {
 
 // Sets up the command flags and add the command to the root command.
 func init() {
-	rootCmd.AddCommand(unusedKeysCmd)
+	rootCmd.AddCommand(detectCmd)
 
-	unusedKeysCmd.Flags().StringVarP(&unusedTranslationsPath, "translations", "t", "", "Path to translation JSON file or directory")
-	unusedKeysCmd.Flags().StringVarP(&unusedSourcePath, "source", "s", "", "Path to frontend source directory")
-	unusedKeysCmd.Flags().StringVar(&unusedFormat, "format", "text", "Output format: text or json")
-	unusedKeysCmd.Flags().StringVar(&unusedPrefix, "prefix", "_globalTranslations.", "Translation key prefix to analyze")
-	unusedKeysCmd.Flags().StringSliceVar(&unusedExts, "ext", []string{".js", ".jsx", ".ts", ".tsx", ".vue", ".svelte", ".html"}, "Source file extensions to scan")
-	unusedKeysCmd.Flags().StringSliceVar(&unusedExcludeDirs, "exclude-dir", []string{"node_modules", "dist", "build", "coverage", ".next"}, "Directory names to skip while scanning source files")
+	detectCmd.Flags().StringVarP(&translationsPath, "translations", "t", "", "Path to translation JSON file or directory")
+	detectCmd.Flags().StringVarP(&sourcePath, "source", "s", "", "Path to frontend source directory")
+	detectCmd.Flags().StringVar(&format, "format", "text", "Output format: text or json")
+	detectCmd.Flags().StringVar(&prefix, "prefix", "_globalTranslations.", "Translation key prefix to analyze")
+	detectCmd.Flags().StringSliceVar(&extensions, "ext", []string{".js", ".jsx", ".ts", ".tsx", ".vue", ".svelte", ".html"}, "Source file extensions to scan")
+	detectCmd.Flags().StringSliceVar(&excludeDirs, "exclude-dir", []string{"node_modules", "dist", "build", "coverage", ".next"}, "Directory names to skip while scanning source files")
 
 	// Those functions return an error if the flag doesn't exist, but we just defined them, so we can ignore the error.
-	_ = unusedKeysCmd.MarkFlagRequired("translations")
-	_ = unusedKeysCmd.MarkFlagRequired("source")
+	_ = detectCmd.MarkFlagRequired("translations")
+	_ = detectCmd.MarkFlagRequired("source")
 }
