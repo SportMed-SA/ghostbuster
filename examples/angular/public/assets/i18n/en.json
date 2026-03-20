@@ -1,0 +1,75 @@
+{
+  "_globalTranslations": {
+    "appTitle": "Ghostbnb",
+    "appDescription": "Book unforgettable stays with a friendly ghostly twist.",
+    "scanButton": "Scan for Unused Keys",
+    "resultsTitle": "Scan Results",
+    "unusedKeysTitle": "Unused Translation Keys",
+    "unknownKeysTitle": "Unknown Translation Keys",
+    "noUnusedKeys": "No unused translation keys found.",
+    "noUnknownKeys": "No unknown translation keys found.",
+    "errorMessage": "An error occurred while scanning: {{error}}",
+    "demo": {
+      "eyebrow": "Haunted Hospitality",
+      "languageSwitcherLabel": "Language switcher",
+      "languages": {
+        "en": "EN",
+        "de": "DE"
+      },
+      "links": {
+        "features": "Unique Stays",
+        "updates": "Host Stories"
+      },
+      "heroPanel": {
+        "title": "Why travelers love Ghostbnb",
+        "body": "From moonlit cottages to whispering lofts, discover character-filled homes hosted by locals and their cheerful resident spirits.",
+        "item1": "Curated haunted homes with style",
+        "item2": "Instant booking and transparent pricing",
+        "item3": "Guest-safe paranormal hospitality"
+      },
+      "dashboard": {
+        "title": "Example Dashboard",
+        "subtitle": "Team workspace preview"
+      },
+      "featureCards": {
+        "card1": {
+          "title": "Stay in Legendary Homes",
+          "body": "Sleep in castles, lighthouses, and manors with stories older than the maps."
+        },
+        "card2": {
+          "title": "Hosts With Character",
+          "body": "Meet superhosts who pair modern comfort with curated ghostly folklore."
+        },
+        "card3": {
+          "title": "Memories, Not Jump Scares",
+          "body": "Every stay is reviewed for charm, safety, and unforgettable midnight ambiance."
+        }
+      },
+      "stats": {
+        "openTasksLabel": "Open Tasks",
+        "activeMembersLabel": "Active Members",
+        "sprintHealthLabel": "Sprint Health",
+        "sprintHealthValue": "Green"
+      },
+      "highlights": {
+        "title": "Guest Favorites",
+        "item1": "Late-night tea sessions in candlelit libraries.",
+        "item2": "Rooftop views with gentle phantom footsteps.",
+        "item3": "Locally curated guides to eerie neighborhood gems."
+      },
+      "news": {
+        "title": "From the Community",
+        "body": "This month, our hosts opened 12 newly restored heritage homes for brave weekend travelers."
+      },
+      "quote": {
+        "text": "\"We came for the architecture, stayed for the midnight piano music, and left with the best travel story of our year.\"",
+        "author": "Mara, Superguest"
+      },
+      "cta": {
+        "text": "Ready for your next beautifully haunted getaway?",
+        "action": "Explore Ghost Stays"
+      },
+      "disclaimer": "This page is for demonstration purposes only and is not an actual offer."
+    }
+  }
+}

@@ -1,0 +1,101 @@
+<main class="landing">
+  <nav class="shell-nav">
+    <a href="#" class="brand">{{ '_globalTranslations.appTitle' | translate }}</a>
+
+    <div class="menu-links">
+      <a href="#stays">{{ '_globalTranslations.demo.links.features' | translate }}</a>
+      <a href="#journal">{{ '_globalTranslations.demo.links.updates' | translate }}</a>
+    </div>
+
+    <div
+      class="lang-toggle"
+      role="group"
+      [attr.aria-label]="'_globalTranslations.demo.languageSwitcherLabel' | translate"
+    >
+      <button type="button" [class.active]="currentLang() === 'en'" (click)="switchLanguage('en')">
+        {{ '_globalTranslations.demo.languages.en' | translate }}
+      </button>
+      <button type="button" [class.active]="currentLang() === 'de'" (click)="switchLanguage('de')">
+        {{ '_globalTranslations.demo.languages.de' | translate }}
+      </button>
+    </div>
+  </nav>
+
+  <section class="stage">
+    <div class="stage-copy">
+      <p class="eyebrow">{{ '_globalTranslations.demo.eyebrow' | translate }}</p>
+      <h1>{{ '_globalTranslations.appDescription' | translate }}</h1>
+      <p>{{ '_globalTranslations.demo.heroPanel.body' | translate }}</p>
+
+      <div class="stage-actions">
+        <a class="btn btn-primary" href="#stays">{{
+          '_globalTranslations.demo.cta.action' | translate
+        }}</a>
+        <a class="btn btn-secondary" href="#journal">{{
+          '_globalTranslations.demo.links.updates' | translate
+        }}</a>
+      </div>
+    </div>
+
+    <aside class="moon-note">
+      <h2>{{ '_globalTranslations.demo.heroPanel.title' | translate }}</h2>
+      <ul>
+        <li>{{ '_globalTranslations.demo.heroPanel.item1' | translate }}</li>
+        <li>{{ '_globalTranslations.demo.heroPanel.item2' | translate }}</li>
+        <li>{{ '_globalTranslations.demo.heroPanel.item3' | translate }}</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="stays" id="stays">
+    <header class="section-head">
+      <h2>{{ '_globalTranslations.demo.links.features' | translate }}</h2>
+      <p>{{ '_globalTranslations.demo.highlights.title' | translate }}</p>
+    </header>
+
+    <div class="stay-grid">
+      <article class="stay-card">
+        <div class="stay-image stay-image-1" aria-hidden="true"></div>
+        <h3>{{ '_globalTranslations.demo.featureCards.card1.title' | translate }}</h3>
+        <p>{{ '_globalTranslations.demo.featureCards.card1.body' | translate }}</p>
+      </article>
+
+      <article class="stay-card">
+        <div class="stay-image stay-image-2" aria-hidden="true"></div>
+        <h3>{{ '_globalTranslations.demo.featureCards.card2.title' | translate }}</h3>
+        <p>{{ '_globalTranslations.demo.featureCards.card2.body' | translate }}</p>
+      </article>
+
+      <article class="stay-card">
+        <div class="stay-image stay-image-3" aria-hidden="true"></div>
+        <h3>{{ '_globalTranslations.demo.featureCards.card3.title' | translate }}</h3>
+        <p>{{ '_globalTranslations.demo.featureCards.card3.body' | translate }}</p>
+      </article>
+    </div>
+
+    <div class="highlights-ribbon">
+      <span>{{ '_globalTranslations.demo.highlights.item1' | translate }}</span>
+      <span>{{ '_globalTranslations.demo.highlights.item2' | translate }}</span>
+      <span>{{ '_globalTranslations.demo.highlights.item3' | translate }}</span>
+    </div>
+  </section>
+
+  <section class="journal" id="journal">
+    <article class="quote-panel">
+      <p class="quote">{{ '_globalTranslations.demo.quote.text' | translate }}</p>
+      <p class="author">{{ '_globalTranslations.demo.quote.author' | translate }}</p>
+    </article>
+
+    <article class="news-panel">
+      <h3>{{ '_globalTranslations.demo.news.title' | translate }}</h3>
+      <p>{{ '_globalTranslations.demo.news.body' | translate }}</p>
+    </article>
+  </section>
+
+  <section class="book-banner">
+    <p>{{ '_globalTranslations.demo.cta.text' | translate }}</p>
+    <a class="btn btn-primary" href="#">{{ '_globalTranslations.demo.cta.action' | translate }}</a>
+  </section>
+
+  <p class="demo-disclaimer">{{ '_globalTranslations.demo.disclaimer' | translate }}</p>
+</main>

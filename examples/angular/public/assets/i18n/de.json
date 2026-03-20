@@ -1,0 +1,75 @@
+{
+  "_globalTranslations": {
+    "appTitle": "Ghostbnb",
+    "appDescription": "Buche unvergessliche Unterkünfte mit einem charmant-geisterhaften Twist.",
+    "scanButton": "Nach ungenutzten Schlüsseln suchen",
+    "resultsTitle": "Scan-Ergebnisse",
+    "unusedKeysTitle": "Ungenutzte Übersetzungsschlüssel",
+    "unknownKeysTitle": "Unbekannte Übersetzungsschlüssel",
+    "noUnusedKeys": "Keine ungenutzten Übersetzungsschlüssel gefunden.",
+    "noUnknownKeys": "Keine unbekannten Übersetzungsschlüssel gefunden.",
+    "errorMessage": "Beim Scannen ist ein Fehler aufgetreten: {{error}}",
+    "demo": {
+      "eyebrow": "Spukhafte Gastfreundschaft",
+      "languageSwitcherLabel": "Sprachauswahl",
+      "languages": {
+        "en": "EN",
+        "de": "DE"
+      },
+      "links": {
+        "features": "Einzigartige Unterkünfte",
+        "updates": "Host-Storys"
+      },
+      "heroPanel": {
+        "title": "Warum Reisende Ghostbnb lieben",
+        "body": "Von mondbeschienenen Cottages bis zu flüsternden Lofts: Entdecke charaktervolle Unterkünfte mit lokalen Hosts und freundlichen Hausgeistern.",
+        "item1": "Kuratiert: Spukhäuser mit Stil",
+        "item2": "Sofortbuchung und transparente Preise",
+        "item3": "Sichere paranormale Gastfreundschaft"
+      },
+      "dashboard": {
+        "title": "Beispiel-Dashboard",
+        "subtitle": "Vorschau des Team-Arbeitsbereichs"
+      },
+      "featureCards": {
+        "card1": {
+          "title": "Übernachte in legendären Häusern",
+          "body": "Schlafe in Schlössern, Leuchttürmen und Villen mit Geschichten älter als die Landkarten."
+        },
+        "card2": {
+          "title": "Hosts mit Persönlichkeit",
+          "body": "Lerne Superhosts kennen, die modernen Komfort mit liebevoller Geisterfolklore verbinden."
+        },
+        "card3": {
+          "title": "Erinnerungen statt Schreckmomente",
+          "body": "Jeder Aufenthalt wird auf Charme, Sicherheit und unvergessliche Mitternachtsatmosphäre geprüft."
+        }
+      },
+      "stats": {
+        "openTasksLabel": "Offene Aufgaben",
+        "activeMembersLabel": "Aktive Mitglieder",
+        "sprintHealthLabel": "Sprint-Status",
+        "sprintHealthValue": "Gut"
+      },
+      "highlights": {
+        "title": "Gästefavoriten",
+        "item1": "Später Tee in kerzenbeleuchteten Bibliotheken.",
+        "item2": "Dachterrassenblick mit sanften Phantomschritten.",
+        "item3": "Lokale Guides zu den schönsten unheimlichen Orten."
+      },
+      "news": {
+        "title": "Aus der Community",
+        "body": "Diesen Monat haben unsere Hosts 12 frisch restaurierte Heritage-Häuser für mutige Wochenendreisende eröffnet."
+      },
+      "quote": {
+        "text": "\"Wir kamen wegen der Architektur, blieben wegen der Mitternachtsmusik am Klavier und gingen mit der besten Reisegeschichte des Jahres.\"",
+        "author": "Mara, Supergast"
+      },
+      "cta": {
+        "text": "Bereit für deinen nächsten stilvoll-spukhaften Kurztrip?",
+        "action": "Geister-Unterkünfte entdecken"
+      },
+      "disclaimer": "Diese Seite dient nur zur Demonstrationszwecken und ist kein echtes Angebot."
+    }
+  }
+}
