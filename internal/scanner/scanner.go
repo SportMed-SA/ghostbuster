@@ -58,6 +58,10 @@ func FindUnusedKeys(opts Options) (Result, error) {
 
 	unusedKeys := make([]string, 0)
 	for key := range translationKeys {
+		if key == opts.Prefix {
+			continue
+		}
+
 		if _, used := usedKeys[key]; !used {
 			unusedKeys = append(unusedKeys, key)
 		}
