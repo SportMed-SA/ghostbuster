@@ -22,6 +22,10 @@ archives:
       - goos: windows
         format: zip
 
+release:
+  files:
+    - glob: dist/ghostbuster-*
+
 changelog:
   sort: asc
   filters:
