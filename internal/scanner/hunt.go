@@ -1,6 +1,7 @@
 package scanner
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -77,7 +78,7 @@ func HuntUnusedKeys(opts HuntOptions) (HuntResult, error) {
 			result.BackupsCreated = append(result.BackupsCreated, backupPath)
 		}
 
-		updated, err := json.MarshalIndent(root, "", "  ")
+		updated, err := marshalTranslationJSON(root)
 		if err != nil {
 			return HuntResult{}, fmt.Errorf("marshal updated JSON in %q: %w", path, err)
 		}
@@ -87,7 +88,7 @@ func HuntUnusedKeys(opts HuntOptions) (HuntResult, error) {
 			return HuntResult{}, fmt.Errorf("stat translation file %q: %w", path, err)
 		}
 
-		if err := os.WriteFile(path, append(updated, '\n'), info.Mode().Perm()); err != nil {
+		if err := os.WriteFile(path, updated, info.Mode().Perm()); err != nil {
 			return HuntResult{}, fmt.Errorf("write updated translation file %q: %w", path, err)
 		}
 
@@ -103,6 +104,19 @@ func HuntUnusedKeys(opts HuntOptions) (HuntResult, error) {
 	sort.Strings(result.FilesModified)
 	sort.Strings(result.BackupsCreated)
 	return result, nil
+}
+
+func marshalTranslationJSON(root map[string]any) ([]byte, error) {
+	var buffer bytes.Buffer
+	encoder := json.NewEncoder(&buffer)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent("", "  ")
+
+	if err := encoder.Encode(root); err != nil {
+		return nil, err
+	}
+
+	return buffer.Bytes(), nil
 }
 
 func removeUnusedFromMap(node map[string]any, parentKey string, unusedSet map[string]struct{}, removedKeys map[string]struct{}) int {
