@@ -67,8 +67,8 @@ func runHunt(cfg huntRunConfig) error {
 		return errors.New("unsupported format: use text or json")
 	}
 
-	if result.RemovedCount > 0 {
-		return cliExitError{msg: "unused translation keys removed", code: unusedFoundExitCode}
+	if result.RemovedCount > 0 || hasMissingTranslations(result.MissingKeys, result.MissingByFile) {
+		return cliExitError{msg: "translation key issues found", code: issuesFoundExitCode}
 	}
 
 	return nil
@@ -85,6 +85,7 @@ func printHuntTextResult(result scanner.HuntResult, createBackup bool) {
 	if createBackup {
 		fmt.Printf("Backups created: %d\n", len(result.BackupsCreated))
 	}
+	printMissingTranslationCounts(result.MissingKeys, result.MissingByFile)
 
 	if len(result.FilesModified) > 0 {
 		fmt.Println()
@@ -109,6 +110,8 @@ func printHuntTextResult(result scanner.HuntResult, createBackup bool) {
 			fmt.Printf("- %s\n", key)
 		}
 	}
+
+	printMissingTranslationDetails(result.MissingKeys, result.MissingByFile)
 }
 
 func init() {

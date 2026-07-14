@@ -15,13 +15,15 @@ type HuntOptions struct {
 	CreateBackup bool
 }
 
-// HuntResult describes what was changed by a hunt run.
+// HuntResult describes hunt changes and any missing translations that were found.
 type HuntResult struct {
-	DetectedUnusedCount int      `json:"detectedUnusedCount"`
-	RemovedCount        int      `json:"removedCount"`
-	RemovedKeys         []string `json:"removedKeys"`
-	FilesModified       []string `json:"filesModified"`
-	BackupsCreated      []string `json:"backupsCreated"`
+	DetectedUnusedCount int                  `json:"detectedUnusedCount"`
+	RemovedCount        int                  `json:"removedCount"`
+	RemovedKeys         []string             `json:"removedKeys"`
+	FilesModified       []string             `json:"filesModified"`
+	BackupsCreated      []string             `json:"backupsCreated"`
+	MissingKeys         []string             `json:"missingKeys"`
+	MissingByFile       []MissingTranslation `json:"missingByFile"`
 }
 
 // HuntUnusedKeys finds and removes all currently unused translation keys.
@@ -38,6 +40,8 @@ func HuntUnusedKeys(opts HuntOptions) (HuntResult, error) {
 
 	result := HuntResult{
 		DetectedUnusedCount: len(detectResult.UnusedKeys),
+		MissingKeys:         detectResult.MissingKeys,
+		MissingByFile:       detectResult.MissingByFile,
 	}
 	if len(unusedSet) == 0 {
 		return result, nil

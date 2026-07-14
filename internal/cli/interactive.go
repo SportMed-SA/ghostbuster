@@ -262,9 +262,9 @@ func askAction(value *string) error {
 func actionHint(action string) string {
 	switch action {
 	case actionDetect:
-		return "Detect: analyze translations vs source usage and report unused keys without changing files."
+		return "Detect: analyze translations vs source usage and report unused or missing keys without changing files."
 	case actionHunt:
-		return "Hunt: remove currently unused keys and create timestamped backups by default."
+		return "Hunt: remove currently unused keys, report missing translations, and create timestamped backups by default."
 	case actionRestore:
 		return "Restore: recover translation files from the best available backup created by hunt."
 	case actionHelp:

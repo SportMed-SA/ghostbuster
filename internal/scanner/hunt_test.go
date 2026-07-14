@@ -131,6 +131,58 @@ func TestHuntUnusedKeysNoBackup(t *testing.T) {
 	}
 }
 
+func TestHuntUnusedKeysReportsMissingKeysWithoutModifyingTranslations(t *testing.T) {
+	tempDir := t.TempDir()
+	translationsDir := filepath.Join(tempDir, "translations")
+	sourceDir := filepath.Join(tempDir, "src")
+
+	if err := os.MkdirAll(translationsDir, 0o755); err != nil {
+		t.Fatalf("mkdir translations dir: %v", err)
+	}
+	if err := os.MkdirAll(sourceDir, 0o755); err != nil {
+		t.Fatalf("mkdir source dir: %v", err)
+	}
+
+	translationFile := filepath.Join(translationsDir, "en.json")
+	original := []byte(`{"_globalTranslations":{"existing":"Existing"}}`)
+	if err := os.WriteFile(translationFile, original, 0o644); err != nil {
+		t.Fatalf("write translation file: %v", err)
+	}
+	source := `const existing = "_globalTranslations.existing";
+const missing = "_globalTranslations.missing";`
+	if err := os.WriteFile(filepath.Join(sourceDir, "app.ts"), []byte(source), 0o644); err != nil {
+		t.Fatalf("write source file: %v", err)
+	}
+
+	result, err := HuntUnusedKeys(HuntOptions{
+		Options: Options{
+			TranslationsPath: translationsDir,
+			SourcePath:       sourceDir,
+			Prefix:           "_globalTranslations.",
+			Extensions:       []string{".ts"},
+		},
+		CreateBackup: true,
+	})
+	if err != nil {
+		t.Fatalf("hunt unused keys: %v", err)
+	}
+
+	wantMissing := []string{"_globalTranslations.missing"}
+	if !reflect.DeepEqual(result.MissingKeys, wantMissing) {
+		t.Fatalf("missing keys mismatch: got %v, want %v", result.MissingKeys, wantMissing)
+	}
+	if result.RemovedCount != 0 || len(result.FilesModified) != 0 || len(result.BackupsCreated) != 0 {
+		t.Fatalf("missing keys must not modify translations: %+v", result)
+	}
+	updated, err := os.ReadFile(translationFile)
+	if err != nil {
+		t.Fatalf("read translation file: %v", err)
+	}
+	if !reflect.DeepEqual(updated, original) {
+		t.Fatalf("translation file changed: got %q, want %q", updated, original)
+	}
+}
+
 func TestHuntUnusedKeysRemovesOnlyUnusedKeys(t *testing.T) {
 	tempDir := t.TempDir()
 	translationsDir := filepath.Join(tempDir, "translations")

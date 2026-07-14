@@ -9,12 +9,6 @@ import (
 	"strings"
 )
 
-var (
-	doubleQuotedRE   = regexp.MustCompile(`"([^"\\]*(?:\\.[^"\\]*)*)"`)
-	singleQuotedRE   = regexp.MustCompile(`'([^'\\]*(?:\\.[^'\\]*)*)'`)
-	templateQuotedRE = regexp.MustCompile("`([^`\\\\]*(?:\\\\.[^`\\\\]*)*)`")
-)
-
 // Scans the source directory for used translation keys based on the provided prefix and file extensions.
 func scanUsedKeys(sourcePath, prefix string, exts, excludedDirs []string) (map[string]struct{}, error) {
 	if sourcePath == "" {
@@ -45,6 +39,7 @@ func scanUsedKeys(sourcePath, prefix string, exts, excludedDirs []string) (map[s
 		excludeSet[normalized] = struct{}{}
 	}
 
+	keyPatterns := quotedTranslationKeyPatterns(prefix)
 	used := make(map[string]struct{})
 	err := filepath.WalkDir(sourcePath, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -65,7 +60,7 @@ func scanUsedKeys(sourcePath, prefix string, exts, excludedDirs []string) (map[s
 			}
 		}
 
-		fileKeys, err := extractUsedKeysFromFile(path, prefix)
+		fileKeys, err := extractUsedKeysFromFile(path, keyPatterns)
 		if err != nil {
 			return err
 		}
@@ -84,23 +79,30 @@ func scanUsedKeys(sourcePath, prefix string, exts, excludedDirs []string) (map[s
 	return used, nil
 }
 
-// Compares the collected translation keys with the used keys to determine which keys are unused and which used keys are unknown (not defined in translations).
-func extractUsedKeysFromFile(path, prefix string) (map[string]struct{}, error) {
+func quotedTranslationKeyPatterns(prefix string) []*regexp.Regexp {
+	escapedPrefix := regexp.QuoteMeta(prefix)
+	return []*regexp.Regexp{
+		regexp.MustCompile(`"(` + escapedPrefix + `[^"\\]*(?:\\.[^"\\]*)*)"`),
+		regexp.MustCompile(`'(` + escapedPrefix + `[^'\\]*(?:\\.[^'\\]*)*)'`),
+		regexp.MustCompile("`(" + escapedPrefix + "[^`\\\\]*(?:\\\\.[^`\\\\]*)*)`"),
+	}
+}
+
+// Extracts quoted translation keys from a source file.
+func extractUsedKeysFromFile(path string, keyPatterns []*regexp.Regexp) (map[string]struct{}, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("read source file %q: %w", path, err)
 	}
 
 	used := make(map[string]struct{})
-	for _, matches := range [][][]string{doubleQuotedRE.FindAllStringSubmatch(string(content), -1), singleQuotedRE.FindAllStringSubmatch(string(content), -1), templateQuotedRE.FindAllStringSubmatch(string(content), -1)} {
+	for _, pattern := range keyPatterns {
+		matches := pattern.FindAllStringSubmatch(string(content), -1)
 		for _, match := range matches {
 			if len(match) < 2 {
 				continue
 			}
-			value := match[1]
-			if strings.HasPrefix(value, prefix) {
-				used[value] = struct{}{}
-			}
+			used[match[1]] = struct{}{}
 		}
 	}
 

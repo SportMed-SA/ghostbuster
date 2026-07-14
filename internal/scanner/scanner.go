@@ -23,13 +23,20 @@ type Options struct {
 
 // Result is the command output model for both text and JSON formats.
 type Result struct {
-	TranslationKeyCount int      `json:"translationKeyCount"`
-	UsedKeyCount        int      `json:"usedKeyCount"`
-	UnusedKeys          []string `json:"unusedKeys"`
-	UnknownUsedKeys     []string `json:"unknownUsedKeys"`
+	TranslationKeyCount int                  `json:"translationKeyCount"`
+	UsedKeyCount        int                  `json:"usedKeyCount"`
+	UnusedKeys          []string             `json:"unusedKeys"`
+	MissingKeys         []string             `json:"missingKeys"`
+	MissingByFile       []MissingTranslation `json:"missingByFile"`
 }
 
-// FindUnusedKeys parses translation keys and scans source files for used keys.
+// MissingTranslation describes referenced keys that are missing from one translation file.
+type MissingTranslation struct {
+	File string   `json:"file"`
+	Keys []string `json:"keys"`
+}
+
+// FindUnusedKeys analyzes translation keys and source usage for unused and missing keys.
 func FindUnusedKeys(opts Options) (Result, error) {
 	if opts.Prefix == "" {
 		return Result{}, fmt.Errorf("prefix must not be empty")
@@ -41,11 +48,13 @@ func FindUnusedKeys(opts Options) (Result, error) {
 	}
 
 	translationKeys := make(map[string]struct{})
+	translationKeysByFile := make(map[string]map[string]struct{}, len(translationFiles))
 	for _, path := range translationFiles {
 		keys, err := parseTranslationJSON(path, opts.Prefix)
 		if err != nil {
 			return Result{}, err
 		}
+		translationKeysByFile[path] = keys
 		for key := range keys {
 			translationKeys[key] = struct{}{}
 		}
@@ -67,21 +76,41 @@ func FindUnusedKeys(opts Options) (Result, error) {
 		}
 	}
 
-	unknownUsed := make([]string, 0)
+	missingKeys := make([]string, 0)
 	for key := range usedKeys {
 		if _, known := translationKeys[key]; !known {
-			unknownUsed = append(unknownUsed, key)
+			missingKeys = append(missingKeys, key)
 		}
 	}
 
+	missingByFile := make([]MissingTranslation, 0)
+	for _, path := range translationFiles {
+		fileKeys := translationKeysByFile[path]
+		missing := make([]string, 0)
+		for key := range usedKeys {
+			if _, knownAnywhere := translationKeys[key]; !knownAnywhere {
+				continue
+			}
+			if _, knownInFile := fileKeys[key]; !knownInFile {
+				missing = append(missing, key)
+			}
+		}
+		if len(missing) == 0 {
+			continue
+		}
+		sort.Strings(missing)
+		missingByFile = append(missingByFile, MissingTranslation{File: path, Keys: missing})
+	}
+
 	sort.Strings(unusedKeys)
-	sort.Strings(unknownUsed)
+	sort.Strings(missingKeys)
 
 	return Result{
 		TranslationKeyCount: len(translationKeys),
 		UsedKeyCount:        len(usedKeys),
 		UnusedKeys:          unusedKeys,
-		UnknownUsedKeys:     unknownUsed,
+		MissingKeys:         missingKeys,
+		MissingByFile:       missingByFile,
 	}, nil
 }
 

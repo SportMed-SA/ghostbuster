@@ -14,8 +14,8 @@ type exitCoder interface {
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "ghostbuster",
-	Short: "A simple and straightforward tool to find unused translation keys in your project.",
-	Long:  `ghostbuster is a simple command-line tool designed to help developers finding unused translation keys in their projects. It scans nested JSON translation files and frontend source code to identify translation keys that are defined but not used anywhere in the codebase. This helps to keep your translation files clean and maintainable by removing obsolete keys.`,
+	Short: "Find unused and missing translation keys in your project.",
+	Long:  `ghostbuster scans nested JSON translation files and frontend source code to identify keys that are unused, referenced but undefined, or missing from individual translation files. This helps keep translations clean, complete, and maintainable.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(os.Args) == 1 {
 			if !isInteractiveTerminal() {

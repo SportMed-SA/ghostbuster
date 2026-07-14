@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	unusedFoundExitCode = 2
+	issuesFoundExitCode = 2
 )
 
 type cliExitError struct {
@@ -80,8 +80,8 @@ func runDetect(cfg detectRunConfig) error {
 		return errors.New("unsupported format: use text or json")
 	}
 
-	if len(result.UnusedKeys) > 0 {
-		return cliExitError{msg: "unused translation keys found", code: unusedFoundExitCode}
+	if len(result.UnusedKeys) > 0 || hasMissingTranslations(result.MissingKeys, result.MissingByFile) {
+		return cliExitError{msg: "translation key issues found", code: issuesFoundExitCode}
 	}
 
 	return nil
@@ -89,11 +89,11 @@ func runDetect(cfg detectRunConfig) error {
 
 func printTextResult(result scanner.Result) {
 	sort.Strings(result.UnusedKeys)
-	sort.Strings(result.UnknownUsedKeys)
 
 	fmt.Printf("Translation keys: %d\n", result.TranslationKeyCount)
 	fmt.Printf("Used keys: %d\n", result.UsedKeyCount)
 	fmt.Printf("Unused keys: %d\n", len(result.UnusedKeys))
+	printMissingTranslationCounts(result.MissingKeys, result.MissingByFile)
 	if len(result.UnusedKeys) > 0 {
 		fmt.Println()
 		fmt.Println("Unused translation keys:")
@@ -102,11 +102,45 @@ func printTextResult(result scanner.Result) {
 		}
 	}
 
-	if len(result.UnknownUsedKeys) > 0 {
+	printMissingTranslationDetails(result.MissingKeys, result.MissingByFile)
+}
+
+func hasMissingTranslations(missingKeys []string, missingByFile []scanner.MissingTranslation) bool {
+	return len(missingKeys) > 0 || len(missingByFile) > 0
+}
+
+func printMissingTranslationCounts(missingKeys []string, missingByFile []scanner.MissingTranslation) {
+	missingInFiles := 0
+	for _, missing := range missingByFile {
+		missingInFiles += len(missing.Keys)
+	}
+
+	fmt.Printf("Missing referenced keys: %d\n", len(missingKeys))
+	fmt.Printf("Missing translations in files: %d\n", missingInFiles)
+}
+
+func printMissingTranslationDetails(missingKeys []string, missingByFile []scanner.MissingTranslation) {
+	sort.Strings(missingKeys)
+	for i := range missingByFile {
+		sort.Strings(missingByFile[i].Keys)
+	}
+
+	if len(missingKeys) > 0 {
 		fmt.Println()
-		fmt.Println("Used keys not found in translations:")
-		for _, key := range result.UnknownUsedKeys {
+		fmt.Println("Referenced keys not found in any translation file:")
+		for _, key := range missingKeys {
 			fmt.Printf("- %s\n", key)
+		}
+	}
+
+	if len(missingByFile) > 0 {
+		fmt.Println()
+		fmt.Println("Referenced keys missing from translation files:")
+		for _, missing := range missingByFile {
+			fmt.Printf("- %s:\n", missing.File)
+			for _, key := range missing.Keys {
+				fmt.Printf("  - %s\n", key)
+			}
 		}
 	}
 }
